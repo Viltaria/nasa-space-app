@@ -4,15 +4,15 @@ Earth = function() {
 
     var mesh;
     let loader = new THREE.JSONLoader();
-    let name = 'models/earth34.json';
+    let name = 'models/earth_bak.json';
     loader.load(name, function(geometry, materials) {
         mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 
         mesh.vertexColors = THREE.FaceColors;
         mesh.color = COLORS.blue;
-        mesh.position.x = 0;
-        mesh.position.y = 0;
-        mesh.position.z = 0;
+        mesh.position.x = 100;
+        mesh.position.y = 100;
+        mesh.position.z = -100;
 
         var scale = 120;
         mesh.scale.set(scale, scale, scale);
@@ -40,7 +40,7 @@ Player = function() {
     var mesh;
     // Mesh
     let loader = new THREE.JSONLoader();
-    loader.load('models/plane21.json', function(geometry, materials) {
+    loader.load('models/plane.json', function(geometry, materials) {
         mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
         mesh.position.x = 0;
         mesh.position.y = 0;
@@ -76,7 +76,7 @@ Player = function() {
     });
 
     var sun;
-loader.load('models/sun2.json', function(geometry, materials) {
+loader.load('models/sun.json', function(geometry, materials) {
     sun = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
     sun.position.x = 0;
     sun.position.y = 200;
