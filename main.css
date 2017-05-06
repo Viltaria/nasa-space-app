@@ -45,11 +45,24 @@
   left: 95%;
   transform: translate(-50%, -50%);
 }
-.cuck {
-  position: fixed !important;
-  top: 10%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+
+
+.infobox {
+  position: absolute !important;
+  top: 2%;
+  left: 2%;
+}
+
+.nearby {
+  position: absolute;
+  top: 20%;
+  left: 2%;
+}
+
+.toggle {
+  position: absolute;
+  top: 2%;
+  left: 80%;
 }
 
 .pac-container:after {
@@ -66,11 +79,10 @@
   display: none !important;
   height: 0px;
 }
-img {
-    display: none;
-}
 
 
 img[src] {
+
    display: block;
+
  }

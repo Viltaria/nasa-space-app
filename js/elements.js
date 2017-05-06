@@ -81,22 +81,19 @@ PopUpInformationBox = function(name) {
   THREE.Object3D.call(this);
 
   this.element = document.createElement('div');
-  this.element.classList.add('cuck', 'ui', 'red', 'raised', 'very', 'padded', 'text', 'segment', 'container');
+  this.element.classList.add('infobox');
   this.element.innerHTML = `
-    <div class="ui grid">
-      <div class="eight wide column">
-        <center id="cuck">
-          <h2><span id="countryName">?&nbsp;</span><img vspace="5" style="height: 1em;" id="imgFlag"></img></h2>
-        </center>
+
+      <div class="ui icon message">
+        <img id="weatherIcon"></img> &emsp;
+        <div class="content">
+          <div class="header">
+            Wondering where you are?
+          </div>
+          <p>Lat: <span id="lati"></span> &emsp; Lng: <span id="long"></span> &emsp; Country: <span id="countryName"></p>
+        </div>
       </div>
-      <div class="eight wide column">
-        <center>
-          <img id="weatherIcon"></img>
-          <p>Latitude:<span id="lati"></span></p>
-          <p>Longitude:<span id="long"></span></p>
-        </center>
-      </div>
-    </div>
+
   `;
 
   this.element.style.display = '';
@@ -112,6 +109,55 @@ PopUpInformationBox = function(name) {
 
 PopUpInformationBox.prototype = Object.create(THREE.Object3D.prototype);
 PopUpInformationBox.prototype.constructor = PopUpInformationBox;
+
+
+// PopUpInformationBox = function(name) {
+//   THREE.Object3D.call(this);
+//
+//   this.element = document.createElement('div');
+//   this.element.classList.add('aaaa');
+//   this.element.innerHTML = `
+//     <div class="ui equal width grid">
+//       <div class="five wide column">
+//           <div class="five wide column">
+//             <div class="ui segment container">
+//               <center id="cuck">
+//                 <p><span id="countryName">? &nbsp;</span><img vspace="5" style="height: 1em;" id="imgFlag"></img></p>
+//               </center>
+//             </div>
+//           </div>
+//       </div>
+//       <div class="six wide column">
+//         <center>
+//           <div class="ui segment container">
+//             <p>Lat: <span id="lati"></span> &emsp; Lng: <span id="long"></span></p>
+//           </div>
+//         </center>
+//       </div>
+//       <div class="two wide column">
+//         <center>
+//           <div class="ui segment container">
+//             <img id="weatherIcon"></img>
+//           </div>
+//         </center>
+//       </div>
+//     </div>
+//   `;
+//
+//   this.element.style.display = '';
+//
+//   this.addEventListener('added', (function() {
+//     container.appendChild(this.element);
+//   }).bind(this));
+//
+//   this.addEventListener('removed', (function() {
+//     container.removeChild(this.element);
+//   }).bind(this));
+// }
+//
+// PopUpInformationBox.prototype = Object.create(THREE.Object3D.prototype);
+// PopUpInformationBox.prototype.constructor = PopUpInformationBox;
+
 
 BackButton = function() {
   THREE.Object3D.call(this);
@@ -136,14 +182,28 @@ BackButton = function() {
 BackButton.prototype = Object.create(THREE.Object3D.prototype);
 BackButton.prototype.constructor = BackButton;
 
-Button = function(name) {
+
+
+NearbyInfo = function() {
   THREE.Object3D.call(this);
 
   this.element = document.createElement('div');
-  this.element.classList.add(name);
+  this.element.classList.add('nearby');
 
-  this.element.innerHTML = `<button id=${name} class="ui teal basic button massive">Query</button>`;
+  this.element.innerHTML = `
 
+  <button class="ui orange basic button" id="nearbyButton">
+    FIND NEARBY
+  </button>
+
+  <div class="ui hidden message" id="nearbyInfo">
+    <i class="close icon"></i>
+    <p><b>Places near you: &emsp;</b></p>
+    <p><span id="places"></span></p>
+  </div>
+  `;
+
+  this.visible = false;
   this.element.style.display = '';
 
   this.addEventListener('added', (function() {
@@ -156,5 +216,36 @@ Button = function(name) {
 
 }
 
-Button.prototype = Object.create(THREE.Object3D.prototype);
-Button.prototype.constructor = Button;
+NearbyInfo.prototype = Object.create(THREE.Object3D.prototype);
+NearbyInfo.prototype.constructor = NearbyInfo;
+
+
+ToggleButton = function() {
+  THREE.Object3D.call(this);
+
+  this.element = document.createElement('div');
+  this.element.classList.add('toggle');
+
+  this.element.innerHTML = `
+
+  <button class="ui orange basic button" id="toggleButton">
+    TOGGLE
+  </button>
+
+  `;
+
+  this.toggled = false;
+  this.element.style.display = '';
+
+  this.addEventListener('added', (function() {
+    container.appendChild(this.element);
+  }).bind(this));
+
+  this.addEventListener('removed', (function() {
+    container.removeChild(this.element);
+  }).bind(this));
+
+}
+
+ToggleButton.prototype = Object.create(THREE.Object3D.prototype);
+ToggleButton.prototype.constructor = ToggleButton;

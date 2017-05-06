@@ -64,16 +64,65 @@ function init() {
       // Grab the destination string
       destination = $('#inputText').val();
 
-      popup = new PopUpInformationBox(destination);
-      scene.add(popup);
-
       geocodeAddress(geocoder, destination);
 
-      // button = new Button("testButton");
-      // scene.add(button);
 
-      backButton = new BackButton();
+      let toggleButton = new ToggleButton(),
+          backButton = new BackButton(),
+          popup = new PopUpInformationBox(destination),
+          nearbyInfo = new NearbyInfo();
+
+      scene.add(toggleButton);
       scene.add(backButton);
+      scene.add(popup);
+      scene.add(nearbyInfo);
+
+      $('#nearbyButton').click(function() {
+        getPlaces(function(data) {
+          console.log(data.results.length);
+          if(data.results.length == 0) {
+            $('#places').html("-");
+            return;
+          }
+          let places = [];
+          for(var i = 0; i < 2; i++) {
+            console.log(data.results[i].name);
+            if(data.results[i] == null) {
+              continue;
+            }
+            places[i] = toTitleCase(data.results[i].types[0]) + ": " + data.results[i].name;
+          }
+
+          $('#places').html("<p>" + places.join("</p><p>") + "</p>");
+        });
+        if(!nearbyInfo.visible) {
+          $('#nearbyInfo').transition('slide down');
+          nearbyInfo.visible = !nearbyInfo.visible;
+        }
+      });
+
+      $('#nearbyInfo .close').click(function() {
+        $('#nearbyInfo').transition('slide down');
+        nearbyInfo.visible = !nearbyInfo.visible;
+      })
+
+      var startColoringId;
+      $('#toggleButton').click(function() {
+        if(!toggleButton.toggled) {
+          startColoringId = startColoring();
+        }
+        if(toggleButton.toggled) {
+          window.clearInterval(startColoringId);
+          for(var i = 0; i < spheres.length; i++) {
+            scene.remove(spheres[i]);
+          }
+
+          spheres = [];
+        }
+
+        toggleButton.toggled = !toggleButton.toggled;
+      })
+
 
       updateWeather();
     });
@@ -88,6 +137,7 @@ var scene, camera, renderer, container;
 
 function createScene() {
   scene = new THREE.Scene();
+  initMap();
 
   let aspectRatio = WINDOW_WIDTH / WINDOW_HEIGHT,
     fieldOfView = 60,
@@ -188,6 +238,12 @@ var player;
 function createPlayer() {
   player = new Player();
   scene.add(player);
+  getColor(10, 10, function(data) {
+    let array = data.split(" "),
+        hex = rgb2hex(array[0], array[1], array[2]);
+    console.log(array.toString());
+    console.log(hex);
+  });
 }
 
 
@@ -212,8 +268,33 @@ function geocodeAddress(geocoder, address) {
   });
 }
 
-var marker;
 
+
+function getPlaces(cb) {
+  var location = calculatePolar(player.position.clone());
+  $.ajax({
+    url: "http://www.ilungj.com/nasa-space-fly/places.php",
+    type: "POST",
+    data: {
+      lat: location.x,
+      lng: location.y
+    },
+
+    success: function(data) {
+      //console.log(data);
+      console.log(JSON.parse(data));
+      cb(JSON.parse(data));
+    },
+
+    error: function(xhr, status, errorThrown) {
+      console.log(status);
+    }
+  });
+}
+
+
+
+var marker;
 function putMarker(lat, lng) {
 
   var geom = new THREE.ConeGeometry(15, 100, 24);
@@ -244,16 +325,16 @@ function getWeather(lat, lon, cb) {
   });
 }
 
-function getColor(lat, long, cb) {
+function getColor(lat, lng, cb) {
   $.ajax({
     type: "POST",
-    url: "http://10.105.78.221:6969/",
+    url: "http://www.ilungj.com/nasa-space-fly/satellite.php",
     data: {
       lat: lat,
-      lon: long
+      lng: lng
     },
     success: function(data) {
-      //console.log(data);
+      console.log(data);
       cb(data);
     }
   });
@@ -269,17 +350,13 @@ function toTitleCase(str) {
 function updateWeather() {
   setInterval(function() {
     var location = calculatePolar(player.position.clone());
-    $.getJSON(`http://ws.geonames.org/countryCodeJSON?lat=${location.x}&lng=${location.y}&username=demo`, function(data) {
+    $.getJSON(`http://api.geonames.org/countryCodeJSON?lat=${location.x}&lng=${location.y}&username=atobechizen`, function(data) {
       if (!data.countryName) {
-        $('#cuck').hide()
         return;
       }
-      $('#imgFlag').attr('src', `http://www.geognos.com/api/en/countries/flag/${data.countryCode}.png`)
       $('#countryName').text(data.countryName);
-      $('#cuck').show();
     });
     getWeather(location.x, location.y, function(data) {
-      $('#weatherDesc').text(toTitleCase(data.weather[0].description));
       $('#weatherIcon').attr('src', `http://openweathermap.org/img/w/${data.weather[0].icon}.png`)
       if (data.weather[0].id == 800) {
         //console.log("WEATHER IS GOOD");
@@ -319,6 +396,31 @@ function updateWeather() {
     $('#lati').text(location.x.toFixed(2));
     $('#long').text(location.y.toFixed(2));
 
+
+  }, 2000);
+}
+
+var spheres = [];
+function startColoring() {
+  return window.setInterval(function() {
+    var location = calculatePolar(player.position.clone());
+    getColor(location.x, location.y, function(data) {
+
+        let array = data.split(" "),
+            hex = rgb2hex(array[0], array[1], array[2]);
+
+        var geometry = new THREE.SphereGeometry(10, 32, 32);
+        var material = new THREE.MeshBasicMaterial({
+            color: hex
+        })
+        var sphere = new THREE.Mesh(geometry, material);
+        sphere.position.x = player.position.x;
+        sphere.position.y = player.position.y;
+        sphere.position.z = player.position.z;
+        //console.log(player.position.y);
+        spheres.push(sphere);
+        scene.add(sphere);
+    });
   }, 2000);
 }
 
@@ -330,4 +432,15 @@ function componentToHex(c) {
 
 function rgbToHex(r, g, b) {
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+function rgb2hex(red, green, blue) {
+      var rgb = blue | (green << 8) | (red << 16);
+      return '#' + (0x1000000 + rgb).toString(16).slice(1)
+}
+
+function toTitleCase(str)
+{
+    var newstr = str.replace(/_/g, " ");
+    return newstr.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
